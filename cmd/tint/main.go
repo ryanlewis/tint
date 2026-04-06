@@ -24,7 +24,7 @@ var (
 
 // CLI describes the tint command-line interface.
 //
-// Animation behaviour: by default, tint animates when stdout is a terminal
+// Animation behavior: by default, tint animates when stdout is a terminal
 // and renders a single frame otherwise (e.g. when piped to a file or another
 // command). --once forces a single frame even on a terminal. --animate forces
 // animation even when stdout is not a terminal, for cases where you want to
@@ -98,7 +98,7 @@ func shouldAnimate(cli CLI) bool {
 	case cli.Animate:
 		return true
 	default:
-		return term.IsTerminal(int(os.Stdout.Fd()))
+		return term.IsTerminal(int(os.Stdout.Fd())) //nolint:gosec // os.Stdout.Fd() is a small non-negative file descriptor
 	}
 }
 
