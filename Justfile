@@ -1,0 +1,115 @@
+# Tint build automation
+# Run 'just' to see all available targets
+
+# Set shell for Windows compatibility
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+set shell := ["bash", "-uc"]
+
+# Default recipe - show available targets
+default:
+    @just --list
+
+# Version info for ldflags
+version := `git describe --tags --always --dirty 2>/dev/null || echo "dev"`
+commit := `git rev-parse --short HEAD 2>/dev/null || echo "none"`
+date := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+ldflags := "-X main.version=" + version + " -X main.commit=" + commit + " -X main.date=" + date
+
+# Build the tint binary
+build:
+    go build -v -ldflags '{{ldflags}}' -o tint ./cmd/tint
+
+# Run all tests
+test:
+    go test -v -race ./...
+
+# Run linting with golangci-lint
+lint:
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        golangci-lint run ./...; \
+    else \
+        echo "golangci-lint not installed, running go vet instead"; \
+        go vet ./...; \
+    fi
+
+# Format all Go code
+fmt:
+    goimports -w .
+    gofmt -s -w .
+
+# Run benchmarks
+bench:
+    go test -bench=. -benchmem ./...
+
+# Generate test coverage report
+coverage:
+    go test -coverprofile=coverage.out ./...
+    go tool cover -html=coverage.out -o coverage.html
+    @echo "Coverage report generated: coverage.html"
+
+# Run CI checks locally (lint, test, build)
+ci: lint test build
+    @echo "All CI checks passed!"
+
+# Manage Go module dependencies
+mod:
+    go mod tidy
+    go mod verify
+    go mod download
+
+# Clean build artifacts
+clean:
+    rm -f tint
+    rm -f coverage.out coverage.html
+    go clean -cache -testcache
+
+# Install the tint binary to GOPATH/bin
+install:
+    go install -ldflags '{{ldflags}}' ./cmd/tint
+
+# Run the tint binary with example text
+run shader="rainbow":
+    @echo "Hello, tint!" | go run ./cmd/tint {{shader}}
+
+# Show Go environment information
+env:
+    go env
+    go version
+
+# Run tests with verbose output and coverage
+test-verbose:
+    go test -v -cover -race ./...
+
+# Install gotestsum if needed
+test-install:
+    @which gotestsum >/dev/null 2>&1 || (go install gotest.tools/gotestsum@latest && command -v asdf >/dev/null 2>&1 && asdf reshim golang || true)
+
+# Run tests with pretty output using gotestsum
+test-pretty: test-install
+    gotestsum --format testname -- -race ./...
+
+# Watch mode for continuous testing during development
+test-watch: test-install
+    gotestsum --watch --format testname -- -race ./...
+
+# Update all dependencies to latest versions
+update-deps:
+    go get -u ./...
+    go mod tidy
+
+# Verify the project compiles for multiple platforms
+verify-build:
+    GOOS=linux GOARCH=amd64 go build -o /dev/null ./cmd/tint
+    GOOS=linux GOARCH=arm64 go build -o /dev/null ./cmd/tint
+    GOOS=darwin GOARCH=amd64 go build -o /dev/null ./cmd/tint
+    GOOS=darwin GOARCH=arm64 go build -o /dev/null ./cmd/tint
+    GOOS=windows GOARCH=amd64 go build -o /dev/null ./cmd/tint
+    @echo "Cross-compilation verification successful!"
+
+# Run security vulnerability check
+vuln:
+    @if command -v govulncheck >/dev/null 2>&1; then \
+        govulncheck ./...; \
+    else \
+        echo "govulncheck not installed, install with: go install golang.org/x/vuln/cmd/govulncheck@latest"; \
+    fi

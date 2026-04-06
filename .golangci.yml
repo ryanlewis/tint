@@ -1,0 +1,112 @@
+version: "2"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters:
+  default: all
+  disable:
+    # Style preferences — too noisy for this codebase
+    - cyclop
+    - depguard
+    - dupword
+    - exhaustive
+    - exhaustruct
+    - forbidigo
+    - funcorder
+    - funlen
+    - gochecknoglobals
+    - godot
+    - godox
+    - gosmopolitan
+    - ireturn
+    - lll
+    - maintidx
+    - mnd
+    - musttag
+    - nakedret
+    - nestif
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - prealloc
+    - protogetter
+    - recvcheck
+    - tagalign
+    - tagliatelle
+    - testpackage
+    - thelper
+    - tparallel
+    - varnamelen
+    - wrapcheck
+    - wsl
+    - wsl_v5
+
+    # Covered by other linters or not applicable
+    - err113           # too strict for internal errors
+    - canonicalheader  # no HTTP headers
+    - fatcontext       # no nested contexts
+    - gochecksumtype   # no sum types
+    - noinlineerr      # too pedantic
+    - intrange         # style preference
+    - mirror           # style preference
+    - modernize        # style preference
+    - perfsprint       # micro-optimization
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+    gocognit:
+      min-complexity: 30
+    gocyclo:
+      min-complexity: 20
+    goconst:
+      min-len: 3
+      min-occurrences: 4
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+    misspell:
+      locale: US
+    dupl:
+      threshold: 150
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: range
+        - name: receiver-naming
+        - name: indent-error-flow
+        - name: superfluous-else
+        - name: unreachable-code
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+          - dupl
+          - gosec
+          - gocognit
+          - gocyclo
+        path: _test\.go
