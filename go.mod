@@ -2,7 +2,7 @@ module github.com/ryanlewis/tint
 
 go 1.26
 
-toolchain go1.26.9
+toolchain go1.26.10
 
 require (
 	github.com/alecthomas/kong v1.15.0
