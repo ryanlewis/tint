@@ -136,5 +136,6 @@ jobs:
 
       - name: Run govulncheck
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          # v1.10.0 can't type-check the go1.27 stdlib; stay on v1.9.0 until that is fixed upstream.
+          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           govulncheck ./...
