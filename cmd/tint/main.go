@@ -98,7 +98,7 @@ func shouldAnimate(cli CLI) bool {
 	case cli.Animate:
 		return true
 	default:
-		return term.IsTerminal(int(os.Stdout.Fd())) //nolint:gosec // os.Stdout.Fd() is a small non-negative file descriptor
+		return term.IsTerminal(int(os.Stdout.Fd()))
 	}
 }
 
